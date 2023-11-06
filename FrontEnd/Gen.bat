@@ -1,0 +1,1 @@
+..\antlr_tool\Run.bat -Dlanguage=Cpp -listener -visitor -o ./ -package antlrpython3 .\Generated\Python3Lexer.g4 .\Generated\Python3Parser.g4
