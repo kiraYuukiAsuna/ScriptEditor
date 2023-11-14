@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_PREFIX_PATH C:/Qt/6.5.2/msvc2019_64)
+set(CMAKE_PREFIX_PATH C:/Qt/6.6.0/msvc2019_64)
 
 find_package(Qt6 COMPONENTS
         Core
@@ -18,12 +18,13 @@ find_package(Qt6 COMPONENTS
 include_directories(
         ThirdParty/antlr4/include/antlr4-runtime
         ThirdParty/QScintilla/include
-        ThirdParty/fmt/include
+        ThirdParty/yamlcpp/include
 )
 
 link_directories(
         ThirdParty/antlr4/lib/debug
         ThirdParty/QScintilla/lib/debug
+        ThirdParty/yamlcpp/lib/windows/debug
 )
 
 set(PROJECT_HEADER
@@ -40,6 +41,7 @@ set(PROJECT_HEADER
         FrontEnd/AstAnalysis.h
         FrontEnd/AstAnalyzer.h
         FrontEnd/SyntaxErrorListener.h
+        Editor/KeywordDefination.h
 
 )
 
@@ -59,14 +61,17 @@ set(PROJECT_SOURCE
         FrontEnd/AstAnalysis.cpp
         FrontEnd/AstAnalyzer.cpp
         FrontEnd/SyntaxErrorListener.cpp
+        Editor/KeywordDefination.cpp
 )
 
 add_executable(ScriptEditor ${PROJECT_HEADER} ${PROJECT_SOURCE})
 
 target_link_libraries(ScriptEditor
+        PRIVATE
         antlr4-runtime.lib
         qscintilla2_qt6d.lib
         Qt::Core
         Qt::Gui
         Qt::Widgets
+        yaml-cppd.lib
 )

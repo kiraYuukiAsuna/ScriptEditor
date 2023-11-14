@@ -35,6 +35,12 @@ protected:
         astAnalysis.reloadDocument(this->text().toStdString());
         astAnalysis.analysis();
         auto errorInfo = astAnalysis.getErrorInfo();
+
+        for(auto& i : errorInfo){
+            auto str = std::format("in line {} start {} end {}\n", i.line,i.startPos, i.endPos);
+            std::cout<<str;
+        }
+
         for (int i = 0; i < 3; ++i) {
             clearAllIndicators(i);
         }
@@ -46,7 +52,7 @@ protected:
                     fillIndicatorRange(info.line - 1, info.startPos, info.line - 1,
                                        info.endPos, i);
                 }else{
-                    fillIndicatorRange(info.line - 1, 1, info.line - 1,
+                    fillIndicatorRange(info.line - 1, 0, info.line - 1,
                                        info.endPos, i);
                 }
             }
@@ -57,7 +63,7 @@ protected:
                     fillIndicatorRange(info.line - 1, info.startPos, info.line - 1,
                                        info.endPos, i);
                 }else{
-                    fillIndicatorRange(info.line - 1, 1, info.line - 1,
+                    fillIndicatorRange(info.line - 1, 0, info.line - 1,
                                        info.endPos, i);
                 }
             }
