@@ -31,9 +31,9 @@ public:
 
         tokens.setTokenSource(&lexer);
         tokens.fill();
-        for (auto token : tokens.getTokens()) {
-            std::cout << token->toString() << std::endl;
-        }
+        // for (auto token : tokens.getTokens()) {
+        //     std::cout << token->toString() << std::endl;
+        // }
 
         antlrpython3::Python3Parser parser(&tokens);
 
@@ -47,13 +47,13 @@ public:
 
         m_ErrorInfo.insert(m_ErrorInfo.end(), errorListener.getErrorInfo().begin(), errorListener.getErrorInfo().end());
 
-        std::cout << parseTree->toStringTree(&parser) << std::endl << std::endl;
+        // std::cout << parseTree->toStringTree(&parser) << std::endl << std::endl;
 
-        Python3Listener listener;
-        tree::ParseTreeWalker::DEFAULT.walk(&listener, parseTree);
+        Python3Visitor visitor;
+        visitor.visit(parseTree);
 
-        for (const auto& funcInfo : listener.calledFunctions) {
-            if (listener.definedFunctions.find(funcInfo.name) == listener.definedFunctions.end()) {
+        for (const auto& funcInfo : visitor.calledFunctions) {
+            if (visitor.definedFunctions.find(funcInfo.name) == visitor.definedFunctions.end()) {
                 auto errorMessage = "Undefined function: " + funcInfo.name +
                         " at line " + std::to_string(funcInfo.line) +
                         ", position " + std::to_string(funcInfo.start) +

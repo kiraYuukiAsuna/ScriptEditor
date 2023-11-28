@@ -30,11 +30,11 @@ struct KeywordMethodInfo{
 struct KeywordObjectTypeInfo{
     std::string objectTypeName;
     std::vector<KeywordAttrInfo> attr;
-    std::vector<KeywordMethodInfo> method;
+    std::vector<KeywordMethodInfo> methods;
 };
 
 struct KeywordCatalogInfo{
-    std::string typeName;
+    std::string catalogName;
     std::string implementationName;
     std::vector<KeywordObjectTypeInfo> objects;
 };
@@ -47,98 +47,118 @@ struct KeywordInfo{
 
 class KeywordDefination {
 public:
+    KeywordDefination(){
+    }
+
     KeywordDefination(const std::string& filePath){
-        YAML::Node kwRootNode;
+        loadKeyword(filePath);
+    }
+
+    void loadKeyword(const std::string& filePath) {
+                YAML::Node kwRootNode;
         try {
-            kwRootNode = YAML::LoadFile(R"(C:\Users\kiraYuukiAsuna\Desktop\ScriptEditor\common_kw.yml)");
+            kwRootNode = YAML::LoadFile(filePath);
         }catch (YAML::BadFile& e){
             std::cerr<<"Exception: "<<e.what()<<"\n";
         }
 
+        try {
+            m_KeywordInfo.name = "Default";
+            m_KeywordInfo.description = "Default";
+            for (auto it = kwRootNode.begin(); it != kwRootNode.end(); it++) {
+                KeywordCatalogInfo catalogInfo;
+                auto catalogName = it->first.as<std::string>();
+                auto catalogNode = kwRootNode[catalogName];
 
-        std::vector<std::string> typeNames{
-            "ATSPI","Mobile", "TestEngine", "WebUI"
-        };
+                if(catalogNode.IsDefined()){
+                    catalogInfo.catalogName = catalogName;
+                    if(catalogNode["Implementation"].IsDefined()){
+                        catalogInfo.implementationName = catalogNode["Implementation"].as<std::string>();
+                    }
+                    auto objectsNode = catalogNode["Objects"];
 
-        KeywordInfo keywordInfo;
-        keywordInfo.name = "Default";
-        keywordInfo.description = "Default";
-        for (auto it = kwRootNode.begin(); it != kwRootNode.end(); it++) {
-            KeywordCatalogInfo typeInfo;
-            auto catalogName = it->first.as<std::string>();
-            auto catalogNode = kwRootNode[catalogName];
+                    if(objectsNode.IsDefined()){
+                        for (auto it = objectsNode.begin(); it != objectsNode.end(); it++) {
+                            KeywordObjectTypeInfo objectTypeInfo;
+                            auto objectTypeName = it->first.as<std::string>();
+                            YAML::Node methodsNode = objectsNode[objectTypeName]["Methods"];
+                            YAML::Node attrNode = objectsNode[objectTypeName]["Attr"];
 
-            if(catalogNode.IsDefined()){
-                typeInfo.typeName = catalogName;
-                if(catalogNode["Implementation"].IsDefined()){
-                    typeInfo.implementationName = catalogNode["Implementation"].as<std::string>();
-                }
-                auto objectsNode = catalogNode["Objects"];
+                            if(methodsNode.IsDefined()){
+                                objectTypeInfo.objectTypeName = objectTypeName;
+                                for (auto it = methodsNode.begin(); it != methodsNode.end(); ++it) {
+                                    KeywordMethodInfo methodInfo;
+                                    auto methodName = it->first.as<std::string>();
+                                    methodInfo.methodName = methodName;
+                                    auto paramNode = it->second["Param"];
 
-                if(objectsNode.IsDefined()){
-                    for (auto it = objectsNode.begin(); it != objectsNode.end(); it++) {
-                        KeywordObjectTypeInfo objectTypeInfo;
-                        auto objectTypeName = it->first.as<std::string>();
-                        YAML::Node methodsNode = objectsNode[objectTypeName]["Methods"];
-                        YAML::Node attrNode = objectsNode[objectTypeName]["Attr"];
-
-                        if(methodsNode.IsDefined()){
-                            objectTypeInfo.objectTypeName = objectTypeName;
-                            for (auto it = methodsNode.begin(); it != methodsNode.end(); ++it) {
-                                KeywordMethodInfo methodInfo;
-                                auto methodName = it->first.as<std::string>();
-                                methodInfo.methodName = methodName;
-                                auto paramNode = it->second["Param"];
-
-                                if(paramNode.IsDefined()){
-                                    for (int i = 0; i < paramNode.size(); i++) {
-                                        KeywordParameterInfo parameterInfo;
-
-                                        if(paramNode[i]["name"].IsDefined()){
-                                            parameterInfo.name = paramNode[i]["name"].as<std::string>();
-                                        }
-                                        if(paramNode[i]["optional"].IsDefined()){
-                                            parameterInfo.optional = paramNode[i]["optional"].as<int>();
-                                        }
-                                        if(paramNode[i]["type"].IsDefined()){
-                                            parameterInfo.type = paramNode[i]["type"].as<std::string>();
-                                        }
-                                        methodInfo.parameter.push_back(parameterInfo);
+                                    if(it->second["IsDerived"].IsDefined()) {
+                                        methodInfo.isDerived = it->second["IsDerived"].as<bool>();
                                     }
+                                    if(it->second["IsVerifyPoint"].IsDefined()) {
+                                        methodInfo.isVerifyPoint = it->second["IsVerifyPoint"].as<bool>();
+                                    }
+                                    if(it->second["KeywordType"].IsDefined()) {
+                                        methodInfo.keywordType = it->second["KeywordType"].as<std::string>();
+                                    }
+                                    if(it->second["Original"].IsDefined()) {
+                                        methodInfo.original = it->second["Original"].as<std::string>();
+                                    }
+
+                                    if(paramNode.IsDefined()){
+                                        for (auto && value : paramNode) {
+                                            KeywordParameterInfo parameterInfo;
+
+                                            if(value["name"].IsDefined()){
+                                                parameterInfo.name = value["name"].as<std::string>();
+                                            }
+                                            if(value["optional"].IsDefined()){
+                                                parameterInfo.optional = value["optional"].as<int>();
+                                            }
+                                            if(value["type"].IsDefined()){
+                                                parameterInfo.type = value["type"].as<std::string>();
+                                            }
+                                            methodInfo.parameter.push_back(parameterInfo);
+                                        }
+                                    }
+                                    objectTypeInfo.methods.push_back(methodInfo);
                                 }
-                                objectTypeInfo.method.push_back(methodInfo);
                             }
-                        }
 
-                        if(attrNode.IsDefined()){
-                            for (int i = 0; i < attrNode.size(); i++) {
-                                KeywordAttrInfo attrInfo;
+                            if(attrNode.IsDefined()){
+                                for (int i = 0; i < attrNode.size(); i++) {
+                                    KeywordAttrInfo attrInfo;
 
-                                if(attrNode[i]["name"].IsDefined()){
-                                    attrInfo.name = attrNode[i]["name"].as<std::string>();
-                                }
-                                if(attrNode[i]["optional"].IsDefined()){
-                                    attrInfo.optional = attrNode[i]["optional"].as<int>();
-                                }
-                                if(attrNode[i]["type"].IsDefined()){
-                                    attrInfo.type = attrNode[i]["type"].as<std::string>();
-                                }
+                                    if(attrNode[i]["name"].IsDefined()){
+                                        attrInfo.name = attrNode[i]["name"].as<std::string>();
+                                    }
+                                    if(attrNode[i]["optional"].IsDefined()){
+                                        attrInfo.optional = attrNode[i]["optional"].as<int>();
+                                    }
+                                    if(attrNode[i]["type"].IsDefined()){
+                                        attrInfo.type = attrNode[i]["type"].as<std::string>();
+                                    }
 
-                                objectTypeInfo.attr.push_back(attrInfo);
+                                    objectTypeInfo.attr.push_back(attrInfo);
+                                }
                             }
+                            catalogInfo.objects.push_back(objectTypeInfo);
                         }
-                        typeInfo.objects.push_back(objectTypeInfo);
                     }
                 }
+                m_KeywordInfo.typeInfo.push_back(catalogInfo);
             }
-            keywordInfo.typeInfo.push_back(typeInfo);
+        }catch (std::exception& e) {
+            std::cerr<<"Exception: "<<e.what()<<"\n";
         }
-
     }
 
+    auto& getKeywordInfo() {
+        return m_KeywordInfo;
+    }
 
 private:
-    std::vector<KeywordInfo> m_KeywordMetaInfo;
+    KeywordInfo m_KeywordInfo;
 
 
 

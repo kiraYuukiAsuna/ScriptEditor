@@ -2,6 +2,7 @@
 
 CodeEditor::CodeEditor(QWidget *parent) : QsciScintilla(parent)
 {
+    m_KeywordDefination.loadKeyword(R"(C:\Users\KiraY\Desktop\ScriptEditor\common_kw.yml)");
     // Set margin for line numbers
     setMarginType(0, QsciScintilla::NumberMargin);
     setMarginWidth(0, "00000");  // Adjust the width to fit the number of lines in your document
@@ -25,15 +26,19 @@ CodeEditor::CodeEditor(QWidget *parent) : QsciScintilla(parent)
 // Connect the marginClicked signal to a slot
     connect(this, &QsciScintilla::marginClicked, this, &CodeEditor::onMarginClicked);
 
-    auto *lexer = new QsciLexerPython(this);
-    auto *apis = new QsciAPIs(lexer);
-    apis->add("function");
-    apis->add("var");
+    m_Lexer = new QsciLexerPython(this);
+    m_Api = new QsciAPIs(m_Lexer);
+    for (auto& catlog : m_KeywordDefination.getKeywordInfo().typeInfo) {
+        for(auto& object : catlog.objects) {
+            for (auto& method : object.methods)
+                m_Api->add(QString::fromStdString(method.methodName));
+        }
+    }
 // ... add other keywords or APIs
-    apis->prepare();
-    lexer->setAPIs(apis);
+    m_Api->prepare();
+    m_Lexer->setAPIs(m_Api);
 
-    this->setLexer(lexer);
+    this->setLexer(m_Lexer);
 
     // Set auto-completion
     setAutoCompletionSource(QsciScintilla::AcsAll);
@@ -75,10 +80,8 @@ CodeEditor::CodeEditor(QWidget *parent) : QsciScintilla(parent)
 
     // 添加一些示例文本
     setText(R"(
-def func():
-    a = 1
+instance.open(fileName)
 
-def a:
 )");
 
     // 在第4行标记一个错误
@@ -142,10 +145,27 @@ void CodeEditor::mouseMoveEvent(QMouseEvent *event) {
 // 检查当前位置是否有错误指示器
     if (indicatorValue != 0) {
 // 如果有错误，显示 CallTip
-        QString errorMessage = "这里有一个错误";
-        SendScintilla(SCI_CALLTIPSHOW, pos, errorMessage.toUtf8().data());
+        if(indicatorValue <= m_CurrentErrorInfo.size()) {
+            QString errorMessage = QString::fromStdString(m_CurrentErrorInfo.at(indicatorValue-1).errorMessage);
+            SendScintilla(SCI_CALLTIPSHOW, pos, errorMessage.toUtf8().data());
+        }
     }else {
 // 如果没有错误，隐藏 CallTip
         SendScintilla(SCI_CALLTIPCANCEL);
     }
 }
+
+void CodeEditor::reloadAutoCompleteApi() {
+    m_Api = new QsciAPIs(m_Lexer);
+    for (auto& catlog : m_KeywordDefination.getKeywordInfo().typeInfo) {
+        for(auto& object : catlog.objects) {
+            for (auto& method : object.methods)
+                m_Api->add(QString::fromStdString(method.methodName));
+        }
+    }
+    // ... add other keywords or APIs
+    m_Api->prepare();
+    m_Lexer->setAPIs(m_Api);
+}
+
+
