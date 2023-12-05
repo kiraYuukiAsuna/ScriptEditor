@@ -1,9 +1,8 @@
 #pragma once
 
 #include "antlr4-runtime.h"
-#include "FrontEnd/Generated/Python3Lexer.h"
-#include "FrontEnd/Generated/Python3Parser.h"
-#include "FrontEnd/Generated/Python3ParserBaseListener.h"
+#include "FrontEnd/Generated/antlr4/KeywordGrammarLexer.h"
+#include "FrontEnd/Generated/antlr4/KeywordGrammarParser.h"
 #include "AstAnalyzer.h"
 #include "SyntaxErrorListener.h"
 #include "Common/TypeDef.h"
@@ -25,7 +24,7 @@ public:
 
     void analysis(){
         ANTLRInputStream input(m_Document);
-        antlrpython3::Python3Lexer lexer(&input);
+        Keyword::KeywordGrammarLexer lexer(&input);
 
         CommonTokenStream tokens(&lexer);
 
@@ -35,7 +34,7 @@ public:
         //     std::cout << token->toString() << std::endl;
         // }
 
-        antlrpython3::Python3Parser parser(&tokens);
+        Keyword::KeywordGrammarParser parser(&tokens);
 
         // Use our custom error listener
         CustomErrorListener errorListener;
@@ -43,28 +42,29 @@ public:
         parser.addErrorListener(&errorListener);
 
         tree::ParseTree* parseTree;
-        parseTree = parser.file_input();
+        parseTree = parser.start_();
 
         m_ErrorInfo.insert(m_ErrorInfo.end(), errorListener.getErrorInfo().begin(), errorListener.getErrorInfo().end());
 
         // std::cout << parseTree->toStringTree(&parser) << std::endl << std::endl;
 
-        Python3Visitor visitor;
+        KeywordGrammarCustomVisitor visitor;
         visitor.visit(parseTree);
 
-        for (const auto& funcInfo : visitor.calledFunctions) {
-            if (visitor.definedFunctions.find(funcInfo.name) == visitor.definedFunctions.end()) {
-                auto errorMessage = "Undefined function: " + funcInfo.name +
-                        " at line " + std::to_string(funcInfo.line) +
-                        ", position " + std::to_string(funcInfo.start) +
-                        " to " +std::to_string(funcInfo.end) + "\n";
 
-                m_ErrorInfo.push_back(ErrorInfo{static_cast<int>(funcInfo.line), static_cast<int>(funcInfo.start), static_cast<int>(funcInfo.end), errorMessage});
-
-                std::cout << errorMessage;
-
-            }
-        }
+        // for (const auto& funcInfo : visitor.calledFunctions) {
+        //     if (visitor.definedFunctions.find(funcInfo.name) == visitor.definedFunctions.end()) {
+        //         auto errorMessage = "Undefined function: " + funcInfo.name +
+        //                 " at line " + std::to_string(funcInfo.line) +
+        //                 ", position " + std::to_string(funcInfo.start) +
+        //                 " to " +std::to_string(funcInfo.end) + "\n";
+        //
+        //         m_ErrorInfo.push_back(ErrorInfo{static_cast<int>(funcInfo.line), static_cast<int>(funcInfo.start), static_cast<int>(funcInfo.end), errorMessage});
+        //
+        //         std::cout << errorMessage;
+        //
+        //     }
+        // }
     }
 
     std::vector<ErrorInfo>& getErrorInfo(){

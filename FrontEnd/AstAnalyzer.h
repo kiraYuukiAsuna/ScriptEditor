@@ -1,134 +1,162 @@
 #pragma once
 
 #include "antlr4-runtime.h"
-#include "Common/TypeDef.h"
-#include "Generated/Python3ParserBaseVisitor.h"
+#include "Generated/antlr4/KeywordGrammarBaseVisitor.h"
+#include "Editor/KeywordDefination.h"
 
-class Python3Visitor : public antlrpython3::Python3ParserBaseVisitor {
+struct ValTypeMetaInfo {
+    std::string name;
+    std::string type;
+};
+
+class KeywordGrammarCustomVisitor : public Keyword::KeywordGrammarBaseVisitor    {
 public:
-    std::set<std::string> definedFunctions;
-    std::set<FunctionInfo> calledFunctions;
+    std::vector<KeywordObjectTypeInfo> DefinedObject;
+    std::vector<std::pair<std::string, KeywordMethodInfo>> DefinedObjMethod;
+    std::vector<KeywordMethodInfo> DefinedMethod;
+    std::vector<ValTypeMetaInfo> DefinedVal;
+    std::vector<std::pair<std::string, std::string>> ValAssignment;
+    std::vector<std::pair<std::string, std::vector<KeywordParameterInfo>>> MethodCall;
+    std::vector<std::pair<std::pair<std::string, std::string>, std::vector<KeywordParameterInfo>>> ObjMethodCall;
 
-    // antlrcpp::Any visitFuncdef(antlrpython3::Python3Parser::FuncdefContext *context) override {
-    //     definedFunctions.insert(context->name()->getText());
-    //
-    //     // Process parameters
-    //     auto paramsCtx = context->parameters();
-    //     if (paramsCtx) {
-    //         auto argContext = paramsCtx->typedargslist();
-    //         if (argContext) {
-    //             for (auto tfpdef : argContext->tfpdef()) {
-    //                 if (tfpdef) {
-    //                     std::cout << "Parameter: " << tfpdef->getText() << std::endl;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //
-    //     // Process parameter type hints
-    //     if (paramsCtx) {
-    //         auto argContext = paramsCtx->typedargslist();
-    //         if (argContext) {
-    //             for (size_t i = 0; i < argContext->tfpdef().size(); i++) {
-    //                 auto tfpdef = argContext->tfpdef()[i];
-    //                 if (tfpdef) {
-    //                     std::string paramName = tfpdef->name()->getText();
-    //                     auto typeHint = tfpdef->test();
-    //                     if (typeHint) {
-    //                         std::string paramType = typeHint->getText();
-    //                         // Check types as per your requirements
-    //                         if (i == 0 && paramType != "str") {
-    //                             std::cout << "Error: First parameter should be of type 'str'" << std::endl;
-    //                         } else if (i == 1 && paramType != "int") {
-    //                             std::cout << "Error: Second parameter should be of type 'int'" << std::endl;
-    //                         }
-    //                     } else {
-    //                         // Handle no type hint
-    //                         std::cout << "Parameter " << paramName << " has no type hint." << std::endl;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //
-    //     // Process return type hint
-    //     auto returnTypeHint = context->test();
-    //     if (returnTypeHint) {
-    //         std::string returnType = returnTypeHint->getText();
-    //         // Check the return type as per your requirements
-    //         if (returnType != "int") {
-    //             std::cout << "Error: Return type should be 'int'" << std::endl;
-    //         }
-    //     } else {
-    //         std::cout << "Function has no return type hint." << std::endl;
-    //     }
-    //
-    //     return visitChildren(context);
-    // }
+    std::any visitObjectdef(Keyword::KeywordGrammarParser::ObjectdefContext *ctx) override {
+        std::string objectIdentifier = ctx->objectIdentifier()->getText();
+        DefinedObject.push_back({
+            .objectTypeName = objectIdentifier
+        });
 
-    antlrcpp::Any visitTrailer(antlrpython3::Python3Parser::TrailerContext* context) override {
-        if (context->DOT()) {
-
-        }
-        else {
-            // Process function call
-            auto parent = dynamic_cast<antlrpython3::Python3Parser::Atom_exprContext *>(context->parent);
-
-            if (parent) {
-                std::cout<<parent->atom()->getText()<<"\n";
-                for(auto& a : parent->trailer()) {
-                    if(a->DOT()) {
-                        auto* nameNode = a->name();
-                        if (nameNode) {
-                            std::string methodName = nameNode->getText();
-                            std::cout << "Method or attribute name: " << methodName << "(";
-                        }
-
-                        auto arglistContext = a->arglist();
-                        if (arglistContext) {
-                            // Process arguments if needed
-                            for (size_t i = 0; i < arglistContext->argument().size(); ++i) {
-                                auto arg = arglistContext->argument()[i];
-                                std::cout << arg->getText();
-
-                                // Print a comma if there are more arguments
-                                if (i < arglistContext->argument().size() - 1) {
-                                    std::cout << ", ";
-                                }
-                            }
-                        }
-                        std::cout << ")\n" << std::endl;
-                    }else if(a->OPEN_PAREN()){
-                        auto arglistContext = a->arglist();
-                        if (arglistContext) {
-                            // Process arguments if needed
-                            for (size_t i = 0; i < arglistContext->argument().size(); ++i) {
-                                auto arg = arglistContext->argument()[i];
-                                std::cout << arg->getText();
-
-                                // Print a comma if there are more arguments
-                                if (i < arglistContext->argument().size() - 1) {
-                                    std::cout << ", ";
-                                }
-                            }
-                        }
-
-                        auto token = context->getStart();
-                        size_t start = token->getCharPositionInLine();
-                        size_t stop = start + token->getText().length() - 1;
-
-                        calledFunctions.insert(FunctionInfo(
-                            a->getText(),
-                            token->getLine(),
-                            start,
-                            stop
-                        ));
-                    }
-                }
-
-            }
-        }
-
-        return visitChildren(context);
+        return objectIdentifier;
     }
+
+    std::any visitObjmethoddef(Keyword::KeywordGrammarParser::ObjmethoddefContext *ctx) override {
+        auto objectIdentifier = ctx->objectIdentifier()->getText();
+        auto methodIdentifier = ctx->methodIdentifier()->getText();
+
+        if(!ctx->paramenterDeflist()) {
+            return defaultResult();
+        }
+
+        std::vector<KeywordParameterInfo> parameterInfo;
+        auto paraListSize = ctx->paramenterDeflist()->paramenterDef().size();
+        for (int i=0;i<paraListSize;i++) {
+            auto paraTypeIdentifier = ctx->paramenterDeflist()->paramenterDef().at(i)->typeIdentifier()->getText();
+            auto paraIdentifier = ctx->paramenterDeflist()->paramenterDef().at(i)->paramenter()->identifier()->getText();
+            parameterInfo.push_back(
+                KeywordParameterInfo{
+                    .name = paraIdentifier,
+                    .type = paraTypeIdentifier
+                });
+        }
+        DefinedObjMethod.emplace_back(objectIdentifier, KeywordMethodInfo{
+            .methodName = methodIdentifier,
+            .parameter = parameterInfo
+        });
+
+        return methodIdentifier;
+    }
+
+    std::any visitMethoddef(Keyword::KeywordGrammarParser::MethoddefContext *ctx) override {
+        auto methodIdentifier = ctx->methodIdentifier()->getText();
+
+        if(!ctx->paramenterDeflist()) {
+            return defaultResult();
+        }
+
+        std::vector<KeywordParameterInfo> parameterInfo;
+        auto paraListSize = ctx->paramenterDeflist()->paramenterDef().size();
+        for (int i=0;i<paraListSize;i++) {
+            auto paraTypeIdentifier = ctx->paramenterDeflist()->paramenterDef().at(i)->typeIdentifier()->getText();
+            auto paraIdentifier = ctx->paramenterDeflist()->paramenterDef().at(i)->paramenter()->identifier()->getText();
+            parameterInfo.push_back(
+                KeywordParameterInfo{
+                    paraIdentifier,
+                     paraTypeIdentifier
+                });
+        }
+        DefinedMethod.emplace_back(KeywordMethodInfo{
+            methodIdentifier,
+            false,
+            false,
+            "",
+            "",
+             parameterInfo
+        });
+
+        return methodIdentifier;
+    }
+
+    std::any visitValdef(Keyword::KeywordGrammarParser::ValdefContext *ctx) override {
+        auto valTypeIdentifier = ctx->typeIdentifier()->getText();
+        auto valIdentifier = ctx->valIdentifier()->getText();
+        DefinedVal.push_back(ValTypeMetaInfo{
+           valTypeIdentifier,
+             valIdentifier
+        });
+
+        return valIdentifier;
+    }
+
+    std::any visitValassignment(Keyword::KeywordGrammarParser::ValassignmentContext *ctx) override {
+        if(ctx->valIdentifier().size() != 2) {
+            std::string leftValIdentifier = ctx->valIdentifier().at(0)->getText();
+            std::string rightValIdentifier = ctx->valIdentifier().at(1)->getText();
+            ValAssignment.push_back(std::pair{leftValIdentifier, rightValIdentifier});
+
+            return std::pair{leftValIdentifier, rightValIdentifier};
+        }
+
+        return std::pair{"", ""};
+    }
+
+    std::any visitMethodcall(Keyword::KeywordGrammarParser::MethodcallContext *ctx) override {
+        std::string methodIdentifier = ctx->methodIdentifier()->getText();
+
+        if(!ctx->paramenterlist()) {
+            return defaultResult();
+        }
+
+        std::vector<KeywordParameterInfo> parameterInfos;
+        auto paraSize = ctx->paramenterlist()->paramenter().size();
+        for (int i=0;i<paraSize;i++) {
+            auto paraIdentifier = ctx->paramenterlist()->paramenter().at(i)->getText();
+
+            parameterInfos.push_back(KeywordParameterInfo{
+                .name = paraIdentifier,
+            });
+        }
+
+        MethodCall.push_back(std::pair<std::string, std::vector<KeywordParameterInfo>>{
+            methodIdentifier,
+            parameterInfos
+        });
+
+        return methodIdentifier;
+    }
+
+    std::any visitObjmethodcall(Keyword::KeywordGrammarParser::ObjmethodcallContext *ctx) override {
+        std::string objectIdentifier = ctx->objectIdentifier()->getText();
+        std::string methodIdentifier = ctx->methodIdentifier()->getText();
+
+        if(!ctx->paramenterlist()) {
+            return defaultResult();
+        }
+
+        std::vector<KeywordParameterInfo> parameterInfos;
+        auto paraSize = ctx->paramenterlist()->paramenter().size();
+        for (int i=0;i<paraSize;i++) {
+            auto paraIdentifier = ctx->paramenterlist()->paramenter().at(i)->getText();
+
+            parameterInfos.push_back(KeywordParameterInfo{
+                .name = paraIdentifier,
+            });
+        }
+
+        ObjMethodCall.push_back(std::pair<std::pair<std::string,std::string>, std::vector<KeywordParameterInfo>>{
+            std::pair<std::string,std::string>{objectIdentifier, methodIdentifier},
+            parameterInfos
+        });
+
+        return methodIdentifier;
+    }
+
 };

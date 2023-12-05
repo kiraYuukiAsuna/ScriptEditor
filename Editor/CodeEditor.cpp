@@ -2,7 +2,7 @@
 
 CodeEditor::CodeEditor(QWidget *parent) : QsciScintilla(parent)
 {
-    m_KeywordDefination.loadKeyword(R"(C:\Users\KiraY\Desktop\ScriptEditor\common_kw.yml)");
+    m_KeywordDefination.loadKeyword(R"(../common_kw.yml)");
     // Set margin for line numbers
     setMarginType(0, QsciScintilla::NumberMargin);
     setMarginWidth(0, "00000");  // Adjust the width to fit the number of lines in your document

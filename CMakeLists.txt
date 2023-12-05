@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_PREFIX_PATH C:/Qt/6.6.0/msvc2019_64)
+set(CMAKE_PREFIX_PATH C:/Qt/6.6.1/msvc2019_64)
 
 find_package(Qt6 COMPONENTS
         Core
@@ -28,14 +28,10 @@ link_directories(
 )
 
 set(PROJECT_HEADER
-        FrontEnd/Generated/Python3Lexer.h
-        FrontEnd/Generated/Python3LexerBase.h
-        FrontEnd/Generated/Python3Parser.h
-        FrontEnd/Generated/Python3ParserBase.h
-        FrontEnd/Generated/Python3ParserBaseListener.h
-        FrontEnd/Generated/Python3ParserBaseVisitor.h
-        FrontEnd/Generated/Python3ParserListener.h
-        FrontEnd/Generated/Python3ParserVisitor.h
+        FrontEnd/Generated/antlr4/KeywordGrammarLexer.h
+        FrontEnd/Generated/antlr4/KeywordGrammarParser.h
+        FrontEnd/Generated/antlr4/KeywordGrammarBaseVisitor.h
+        FrontEnd/Generated/antlr4/KeywordGrammarBaseVisitor.h
 
         Editor/CodeEditor.h
         FrontEnd/AstAnalysis.h
@@ -48,14 +44,10 @@ set(PROJECT_HEADER
 set(PROJECT_SOURCE
         main.cpp
 
-        FrontEnd/Generated/Python3Lexer.cpp
-        FrontEnd/Generated/Python3LexerBase.cpp
-        FrontEnd/Generated/Python3Parser.cpp
-        FrontEnd/Generated/Python3ParserBase.cpp
-        FrontEnd/Generated/Python3ParserBaseListener.cpp
-        FrontEnd/Generated/Python3ParserBaseVisitor.cpp
-        FrontEnd/Generated/Python3ParserListener.cpp
-        FrontEnd/Generated/Python3ParserVisitor.cpp
+        FrontEnd/Generated/antlr4/KeywordGrammarLexer.cpp
+        FrontEnd/Generated/antlr4/KeywordGrammarParser.cpp
+        FrontEnd/Generated/antlr4/KeywordGrammarBaseVisitor.cpp
+        FrontEnd/Generated/antlr4/KeywordGrammarBaseVisitor.cpp
 
         Editor/CodeEditor.cpp
         FrontEnd/AstAnalysis.cpp

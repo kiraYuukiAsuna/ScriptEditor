@@ -1,1 +1,3 @@
-..\antlr_tool\Run.bat -Dlanguage=Cpp -listener -visitor -o ./ -package antlrpython3 .\Generated\Python3Lexer.g4 .\Generated\Python3Parser.g4
+rmdir /s /q Generated
+mkdir Generated
+..\antlr_tool\Run.bat -Dlanguage=Cpp -listener -visitor -o .\Generated -package Keyword .\antlr4\KeywordGrammar.g4 -no-listener
