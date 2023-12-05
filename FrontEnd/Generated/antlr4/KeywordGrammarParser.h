@@ -1,5 +1,5 @@
 
-// Generated from .//antlr4//KeywordGrammar.g4 by ANTLR 4.13.1
+// Generated from ./antlr4/KeywordGrammar.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -111,6 +111,7 @@ public:
   public:
     StatContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *NEWLINE();
     ObjectdefContext *objectdef();
     ObjmethoddefContext *objmethoddef();
     MethoddefContext *methoddef();

@@ -33,12 +33,12 @@ protected:
 
         AstAnalysis astAnalysis;
         astAnalysis.reloadDocument(this->text().toStdString());
-        astAnalysis.analysis();
+        astAnalysis.analysis(m_KeywordDefination);
         m_CurrentErrorInfo.clear();
         m_CurrentErrorInfo = astAnalysis.getErrorInfo();
 
         for(auto& i : m_CurrentErrorInfo){
-            auto str = std::format("in line {} start {} end {}\n", i.line,i.startPos, i.endPos);
+            auto str = std::format("in line {} start {} end {}\n", i.sePosition.startLine,i.sePosition.startPos, i.sePosition.endPos);
             qDebug()<<str;
         }
 
@@ -49,23 +49,23 @@ protected:
         if(m_CurrentErrorInfo.size() > 3){
             for(int i=0;i<3;i++){
                 auto info = m_CurrentErrorInfo[i];
-                if(info.startPos != info.endPos) {
-                    fillIndicatorRange(info.line - 1, info.startPos, info.line - 1,
-                                       info.endPos, i);
+                if(info.sePosition.startPos != info.sePosition.endPos) {
+                    fillIndicatorRange(info.sePosition.startPos - 1, info.sePosition.startPos, info.sePosition.startLine - 1,
+                                       info.sePosition.endPos, i);
                 }else{
-                    fillIndicatorRange(info.line - 1, 0, info.line - 1,
-                                       info.endPos, i);
+                    fillIndicatorRange(info.sePosition.startLine - 1, 0, info.sePosition.startLine - 1,
+                                       info.sePosition.endPos, i);
                 }
             }
         }else{
             for(int i=0;i<m_CurrentErrorInfo.size();i++){
                 auto info = m_CurrentErrorInfo[i];
-                if(info.startPos != info.endPos) {
-                    fillIndicatorRange(info.line - 1, info.startPos, info.line - 1,
-                                       info.endPos, i);
+                if(info.sePosition.startPos != info.sePosition.endPos) {
+                    fillIndicatorRange(info.sePosition.startLine - 1, info.sePosition.startPos, info.sePosition.startLine - 1,
+                                       info.sePosition.endPos, i);
                 }else{
-                    fillIndicatorRange(info.line - 1, 0, info.line - 1,
-                                       info.endPos, i);
+                    fillIndicatorRange(info.sePosition.startLine - 1, 0, info.sePosition.startLine - 1,
+                                       info.sePosition.endPos, i);
                 }
             }
         }

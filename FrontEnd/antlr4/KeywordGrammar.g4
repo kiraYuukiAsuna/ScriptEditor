@@ -19,7 +19,8 @@ chunk: block;
 block: stat*;
 
 stat:
-	';'
+    NEWLINE
+	| ';'
 	| objectdef
 	| objmethoddef
 	| methoddef

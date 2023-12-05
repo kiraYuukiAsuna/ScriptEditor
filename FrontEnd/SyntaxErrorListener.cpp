@@ -7,7 +7,7 @@ void CustomErrorListener::syntaxError(antlr4::Recognizer *recognizer, antlr4::To
 
     std::cerr << "Error at line " << line << ", from position " << start << " to " << stop << ": " << msg << std::endl;
 
-    m_ErrorInfo.push_back(ErrorInfo{static_cast<int>(line), static_cast<int>(start), static_cast<int>(stop), msg});
+    m_ErrorInfo.push_back(ErrorInfo{static_cast<int>(line),static_cast<int>(line), static_cast<int>(start), static_cast<int>(stop), msg});
 }
 
 std::vector<ErrorInfo> &CustomErrorListener::getErrorInfo() {

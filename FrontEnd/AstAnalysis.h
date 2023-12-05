@@ -22,7 +22,7 @@ public:
         m_Document = document;
     }
 
-    void analysis(){
+    void analysis(KeywordDefination keywordDefination){
         ANTLRInputStream input(m_Document);
         Keyword::KeywordGrammarLexer lexer(&input);
 
@@ -49,8 +49,46 @@ public:
         // std::cout << parseTree->toStringTree(&parser) << std::endl << std::endl;
 
         KeywordGrammarCustomVisitor visitor;
+        auto keywordDef = keywordDefination.getKeywordInfo();
+        for (auto& catalogMeta : keywordDef.typeInfo) {
+            for(auto& objectMeta : catalogMeta.objects){
+                visitor.DefinedObject.emplace_back(objectMeta);
+                for(auto& methodMeta : objectMeta.methods) {
+                    visitor.DefinedObjMethod.emplace_back(objectMeta.objectTypeName,methodMeta);
+                }
+            }
+        }
         visitor.visit(parseTree);
 
+//        for(auto& objMethodCall : visitor.ObjMethodCall){
+//            bool bObjFind = false;
+//            for(auto& definedObject : visitor.DefinedObject){
+//                if(std::get<0>(objMethodCall).first == definedObject.keywordObjectTypeInfo.objectTypeName){
+//                    bObjFind = true;
+//                }
+//            }
+//            if(!bObjFind){
+//                m_ErrorInfo.push_back(ErrorInfo{std::get<2>(objMethodCall),std::get<0>(objMethodCall).first + " is not defined!"});
+//            }
+//        }
+
+        for(auto& objMethodCall : visitor.ObjMethodCall){
+            bool bObjFind = false;
+            bool bMethodFind = false;
+            for(auto& definedObject : visitor.DefinedObjMethod){
+                if(std::get<0>(objMethodCall).first == definedObject.first){
+                    bObjFind = true;
+                    if(std::get<0>(objMethodCall).second == definedObject.second.keywordMethodInfo.methodName){
+                        bMethodFind = true;
+                    }
+                }
+            }
+            if(!bObjFind){
+                m_ErrorInfo.push_back(ErrorInfo{std::get<2>(objMethodCall),std::get<0>(objMethodCall).first + " is not defined!"});
+            }else if(!bMethodFind){
+                m_ErrorInfo.push_back(ErrorInfo{std::get<2>(objMethodCall),std::get<0>(objMethodCall).first + " do not have method " + std::get<0>(objMethodCall).second});
+            }
+        }
 
         // for (const auto& funcInfo : visitor.calledFunctions) {
         //     if (visitor.definedFunctions.find(funcInfo.name) == visitor.definedFunctions.end()) {

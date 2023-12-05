@@ -2,9 +2,13 @@
 
 #include <string>
 
-struct ErrorInfo{
-    int line;
+struct SEPosition{
+    int startLine, endLine;
     int startPos, endPos;
+};
+
+struct ErrorInfo{
+    SEPosition sePosition;
     std::string errorMessage;
 };
 

@@ -5,6 +5,7 @@
 #include <filesystem>
 #include "yaml-cpp/yaml.h"
 #include <iostream>
+#include "Common/TypeDef.h"
 
 struct KeywordParameterInfo{
     std::string name;
@@ -12,10 +13,20 @@ struct KeywordParameterInfo{
     bool optional;
 };
 
+struct KeywordParameterExInfo{
+    KeywordParameterInfo keywordParameterInfo;
+    SEPosition sePosition;
+};
+
 struct KeywordAttrInfo{
     std::string name;
     std::string type;
     bool optional;
+};
+
+struct KeywordAttrExInfo{
+    KeywordAttrInfo keywordAttrInfo;
+    SEPosition sePosition;
 };
 
 struct KeywordMethodInfo{
@@ -27,10 +38,20 @@ struct KeywordMethodInfo{
     std::vector<KeywordParameterInfo> parameter;
 };
 
+struct KeywordMethodExInfo{
+    KeywordMethodInfo keywordMethodInfo;
+    SEPosition sePosition;
+};
+
 struct KeywordObjectTypeInfo{
     std::string objectTypeName;
     std::vector<KeywordAttrInfo> attr;
     std::vector<KeywordMethodInfo> methods;
+};
+
+struct KeywordObjectTypeExInfo{
+    KeywordObjectTypeInfo keywordObjectTypeInfo;
+    SEPosition sePosition;
 };
 
 struct KeywordCatalogInfo{
@@ -39,10 +60,20 @@ struct KeywordCatalogInfo{
     std::vector<KeywordObjectTypeInfo> objects;
 };
 
+struct KeywordCatalogExInfo{
+    KeywordCatalogInfo keywordCatalogInfo;
+    SEPosition sePosition;
+};
+
 struct KeywordInfo{
     std::string name;
     std::string description;
     std::vector<KeywordCatalogInfo> typeInfo;
+};
+
+struct KeywordExInfo{
+    KeywordInfo KeywordInfo;
+    SEPosition sePosition;
 };
 
 class KeywordDefination {
