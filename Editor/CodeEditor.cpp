@@ -139,9 +139,9 @@ void CodeEditor::mouseMoveEvent(QMouseEvent *event) {
     int start = SendScintilla(SCI_INDICATORSTART, 0, pos);
     int end = SendScintilla(SCI_INDICATOREND, 0, pos);
 
-    if (indicatorValue != 0) {
-        if(indicatorValue <= m_CurrentErrorInfo.size()) {
-            QString errorMessage = QString::fromStdString(m_CurrentErrorInfo.at(indicatorValue-1).errorMessage);
+    if (indicatorValue != -1) {
+        if(indicatorValue < m_CurrentErrorInfo.size()) {
+            QString errorMessage = QString::fromStdString(m_CurrentErrorInfo.at(indicatorValue).errorMessage);
             SendScintilla(SCI_CALLTIPSHOW, pos, errorMessage.toUtf8().data());
         }
     }else {
