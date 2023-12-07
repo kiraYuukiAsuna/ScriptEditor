@@ -28,15 +28,15 @@ link_directories(
 )
 
 set(PROJECT_HEADER
-        FrontEnd/Generated/antlr4/KeywordGrammarLexer.h
-        FrontEnd/Generated/antlr4/KeywordGrammarParser.h
-        FrontEnd/Generated/antlr4/KeywordGrammarBaseVisitor.h
-        FrontEnd/Generated/antlr4/KeywordGrammarBaseVisitor.h
+        Backend/Generated/antlr4/KeywordGrammarLexer.h
+        Backend/Generated/antlr4/KeywordGrammarParser.h
+        Backend/Generated/antlr4/KeywordGrammarBaseVisitor.h
+        Backend/Generated/antlr4/KeywordGrammarBaseVisitor.h
 
         Editor/CodeEditor.h
-        FrontEnd/AstAnalysis.h
-        FrontEnd/AstAnalyzer.h
-        FrontEnd/SyntaxErrorListener.h
+        Backend/BackendAnalyzer.h
+        Backend/AstAnalyzer.h
+        Backend/SyntaxErrorListener.h
         Editor/KeywordDefination.h
 
 )
@@ -44,15 +44,15 @@ set(PROJECT_HEADER
 set(PROJECT_SOURCE
         main.cpp
 
-        FrontEnd/Generated/antlr4/KeywordGrammarLexer.cpp
-        FrontEnd/Generated/antlr4/KeywordGrammarParser.cpp
-        FrontEnd/Generated/antlr4/KeywordGrammarBaseVisitor.cpp
-        FrontEnd/Generated/antlr4/KeywordGrammarBaseVisitor.cpp
+        Backend/Generated/antlr4/KeywordGrammarLexer.cpp
+        Backend/Generated/antlr4/KeywordGrammarParser.cpp
+        Backend/Generated/antlr4/KeywordGrammarBaseVisitor.cpp
+        Backend/Generated/antlr4/KeywordGrammarBaseVisitor.cpp
 
         Editor/CodeEditor.cpp
-        FrontEnd/AstAnalysis.cpp
-        FrontEnd/AstAnalyzer.cpp
-        FrontEnd/SyntaxErrorListener.cpp
+        Backend/BackendAnalyzer.cpp
+        Backend/AstAnalyzer.cpp
+        Backend/SyntaxErrorListener.cpp
         Editor/KeywordDefination.cpp
 )
 

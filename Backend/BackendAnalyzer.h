@@ -1,8 +1,8 @@
 #pragma once
 
 #include "antlr4-runtime.h"
-#include "FrontEnd/Generated/antlr4/KeywordGrammarLexer.h"
-#include "FrontEnd/Generated/antlr4/KeywordGrammarParser.h"
+#include "Backend/Generated/antlr4/KeywordGrammarLexer.h"
+#include "Backend/Generated/antlr4/KeywordGrammarParser.h"
 #include "AstAnalyzer.h"
 #include "SyntaxErrorListener.h"
 #include "Common/TypeDef.h"
@@ -11,7 +11,7 @@
 
 using namespace antlr4;
 
-class AstAnalysis {
+class BackendAnalyzer {
 public:
     void clear(){
         m_Document.clear();
@@ -60,18 +60,6 @@ public:
         }
         visitor.visit(parseTree);
 
-//        for(auto& objMethodCall : visitor.ObjMethodCall){
-//            bool bObjFind = false;
-//            for(auto& definedObject : visitor.DefinedObject){
-//                if(std::get<0>(objMethodCall).first == definedObject.keywordObjectTypeInfo.objectTypeName){
-//                    bObjFind = true;
-//                }
-//            }
-//            if(!bObjFind){
-//                m_ErrorInfo.push_back(ErrorInfo{std::get<2>(objMethodCall),std::get<0>(objMethodCall).first + " is not defined!"});
-//            }
-//        }
-
         for(auto& objMethodCall : visitor.ObjMethodCall){
             bool bObjFind = false;
             bool bMethodFind = false;
@@ -90,19 +78,6 @@ public:
             }
         }
 
-        // for (const auto& funcInfo : visitor.calledFunctions) {
-        //     if (visitor.definedFunctions.find(funcInfo.name) == visitor.definedFunctions.end()) {
-        //         auto errorMessage = "Undefined function: " + funcInfo.name +
-        //                 " at line " + std::to_string(funcInfo.line) +
-        //                 ", position " + std::to_string(funcInfo.start) +
-        //                 " to " +std::to_string(funcInfo.end) + "\n";
-        //
-        //         m_ErrorInfo.push_back(ErrorInfo{static_cast<int>(funcInfo.line), static_cast<int>(funcInfo.start), static_cast<int>(funcInfo.end), errorMessage});
-        //
-        //         std::cout << errorMessage;
-        //
-        //     }
-        // }
     }
 
     std::vector<ErrorInfo>& getErrorInfo(){

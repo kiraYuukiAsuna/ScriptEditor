@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FrontEnd/AstAnalysis.h"
+#include "Backend/BackendAnalyzer.h"
 #include <QMouseEvent>
 #include "Qsci/qsciscintilla.h"
 #include "Qsci/qsciapis.h"
@@ -31,7 +31,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override {
         QsciScintilla::keyPressEvent(event);
 
-        AstAnalysis astAnalysis;
+        BackendAnalyzer astAnalysis;
         astAnalysis.reloadDocument(this->text().toStdString());
         astAnalysis.analysis(m_KeywordDefination);
         m_CurrentErrorInfo.clear();
@@ -39,7 +39,7 @@ protected:
 
         for(auto& i : m_CurrentErrorInfo){
             auto str = std::format("in line {} start {} end {}\n", i.sePosition.startLine,i.sePosition.startPos, i.sePosition.endPos);
-            qDebug()<<str;
+            qDebug()<<str<<" has size:" << m_CurrentErrorInfo.size();;
         }
 
         for (int i = 0; i < 3; ++i) {
@@ -69,7 +69,6 @@ protected:
                 }
             }
         }
-        qDebug()<<m_CurrentErrorInfo.size();
     }
 
     void reloadAutoCompleteApi();

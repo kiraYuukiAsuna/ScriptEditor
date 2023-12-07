@@ -134,23 +134,17 @@ void CodeEditor::mouseMoveEvent(QMouseEvent *event) {
     int line, index;
     lineIndexFromPosition(pos, &line, &index);
 
-// 获取当前位置的指示器值
     int indicatorValue = SendScintilla(SCI_INDICATORVALUEAT, 0, pos);
 
-// 获取指示器的范围
     int start = SendScintilla(SCI_INDICATORSTART, 0, pos);
     int end = SendScintilla(SCI_INDICATOREND, 0, pos);
 
-
-// 检查当前位置是否有错误指示器
     if (indicatorValue != 0) {
-// 如果有错误，显示 CallTip
         if(indicatorValue <= m_CurrentErrorInfo.size()) {
             QString errorMessage = QString::fromStdString(m_CurrentErrorInfo.at(indicatorValue-1).errorMessage);
             SendScintilla(SCI_CALLTIPSHOW, pos, errorMessage.toUtf8().data());
         }
     }else {
-// 如果没有错误，隐藏 CallTip
         SendScintilla(SCI_CALLTIPCANCEL);
     }
 }

@@ -3,7 +3,7 @@
 #include "antlr4-runtime.h"
 #include "Common/TypeDef.h"
 
-class AstAnalysis;
+class BackendAnalyzer;
 
 class CustomErrorListener : public antlr4::BaseErrorListener {
 public:
